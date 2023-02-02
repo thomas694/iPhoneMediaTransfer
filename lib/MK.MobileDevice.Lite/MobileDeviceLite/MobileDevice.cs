@@ -9,19 +9,21 @@ namespace MK.MobileDevice.Lite
 	
     internal class MobileDevice
     {
-        private static readonly DirectoryInfo ApplicationSupportDirectory = new DirectoryInfo(Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Apple Inc.\Apple Application Support", "InstallDir", Environment.CurrentDirectory).ToString());
+        //private static readonly DirectoryInfo ApplicationSupportDirectory = new DirectoryInfo(Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Apple Inc.\Apple Application Support", "InstallDir", Environment.CurrentDirectory).ToString());
         private const string iTMDDLLPath = "iTunesMobileDevice.dll";
-        private static readonly FileInfo iTunesMobileDeviceFile = new FileInfo(Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Apple Inc.\Apple Mobile Device Support\Shared", "iTunesMobileDeviceDLL", iTMDDLLPath).ToString());
+        //private static readonly FileInfo iTunesMobileDeviceFile = new FileInfo(Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Apple Inc.\Apple Mobile Device Support\Shared", "iTunesMobileDeviceDLL", iTMDDLLPath).ToString());
 
         static MobileDevice()
         {
-            string directoryName = iTunesMobileDeviceFile.DirectoryName;
-            
-            if (!iTunesMobileDeviceFile.Exists)
-            {
-                directoryName = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles) + @"\Apple\Mobile Device Support\bin";
-            }
-            Environment.SetEnvironmentVariable("Path", string.Join(";", new string[] { Environment.GetEnvironmentVariable("Path"), directoryName, ApplicationSupportDirectory.FullName }));
+            //string directoryName = iTunesMobileDeviceFile.DirectoryName;
+
+            //if (!iTunesMobileDeviceFile.Exists)
+            //{
+            //    directoryName = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles) + @"\Apple\Mobile Device Support\bin";
+            //}
+            //Environment.SetEnvironmentVariable("Path", string.Join(";", new string[] { Environment.GetEnvironmentVariable("Path"), directoryName, ApplicationSupportDirectory.FullName }));
+            //Environment.SetEnvironmentVariable("Path", string.Join(";", new string[] { Environment.GetEnvironmentVariable("Path"), Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) }));
+            Environment.SetEnvironmentVariable("Path", string.Join(";", new string[] { Environment.GetEnvironmentVariable("Path"), @"C:\Program Files (x86)\Common Files\Apple\Mobile Device Support" }));
         }
 
         

@@ -8,12 +8,14 @@ namespace MK.MobileDevice.Lite
         private long handle;
         private OpenMode mode;
         private iOSDeviceMK phone;
+        private string path;
 
-        private iPhoneFile(iOSDeviceMK phone, long handle, OpenMode mode)
+        private iPhoneFile(iOSDeviceMK phone, long handle, OpenMode mode, string path)
         {
             this.phone = phone;
             this.mode = mode;
             this.handle = handle;
+            this.path = path;
         }
 
         protected override unsafe void Dispose(bool disposing)
@@ -34,8 +36,6 @@ namespace MK.MobileDevice.Lite
 
         public static unsafe iPhoneFile Open(iOSDeviceMK phone, string path, FileAccess openmode)
         {
-        	throw new NotImplementedException();
-        	/*
             long num;
             OpenMode none = OpenMode.None;
             switch (openmode)
@@ -57,21 +57,47 @@ namespace MK.MobileDevice.Lite
             {
                 throw new IOException("AFCFileRefOpen failed with error " + num2.ToString());
             }
-            return new iPhoneFile(phone, num, none);
-            */
+            return new iPhoneFile(phone, num, none, path);
         }
 
         public static iPhoneFile OpenRead(iOSDeviceMK phone, string path)
         {
-        	throw new NotImplementedException();
-        	/*
             return Open(phone, path, FileAccess.Read);
-            */
         }
 
         public static iPhoneFile OpenWrite(iOSDeviceMK phone, string path)
         {
             return Open(phone, path, FileAccess.Write);
+        }
+
+        private const int FILEREAD_BUFFER_SIZE = 4096;
+
+        public unsafe byte[] ReadAll()
+        {
+            void* dict = null;
+            MobileDevice.AFCFileInfoOpen(this.phone.AFCHandle, this.path, ref dict);
+
+            var fileSize = this.phone.FileSize(this.path);
+            byte[] buffer = new byte[FILEREAD_BUFFER_SIZE];
+            uint total = 0;
+            uint len = 0;
+
+            using (var ms = new MemoryStream((int)fileSize))
+            {
+                while (total < fileSize)
+                {
+                    len = (uint)Math.Min(fileSize - total, FILEREAD_BUFFER_SIZE);
+                    int num2 = MobileDevice.AFCFileRefRead(phone.AFCHandle, handle, buffer, ref len);
+                    if (num2 != 0)
+                    {
+                        throw new IOException("AFCFileRefRead error = " + num2.ToString());
+                    }
+                    ms.Write(buffer, 0, (int)len);
+                    total += len;
+                }
+
+                return ms.GetBuffer();
+            }
         }
 
         public override unsafe int Read(byte[] buffer, int offset, int count)
