@@ -29,6 +29,9 @@ So you can either use the "Application Support" (3.1.2) and "Mobile Device Suppo
 use the DLLs in their respective folders.
 Or you can use a newer version of the driver (Mobile Device Support, tested 14.1.0.35), but then you have to use the project's old iTunesMobileDevice.dll as newer 
 versions of the driver don't contain that one any more.
+
+Old iTunes versions can be found here:
+[The iPhone Wiki](https://www.theiphonewiki.com/wiki/ITunes)
 <br>
 
 ## Usage
