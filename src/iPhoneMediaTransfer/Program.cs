@@ -163,9 +163,9 @@ namespace iPhoneMediaTransfer
 
         private static void DoWork()
         {
-            _transferDatabase = false;
-            _transferMedia = true;
-            _createAlbumHardLinks = true;
+            //_transferDatabase = false;
+            //_transferMedia = true;
+            //_createAlbumHardLinks = true;
 
             string filenameDB = _transferDatabase ? CopyPhotosDatabaseFromIOSDevice() : GetFilenameOfNewestLocalDatabase();
 
@@ -209,8 +209,8 @@ namespace iPhoneMediaTransfer
                 var command = connection.CreateCommand();
                 command.CommandText = @"select zAsset.ZDIRECTORY, zAsset.ZFILENAME, zAsset.ZDATECREATED, zGenAlbum.ZTITLE, zAsset.ZTRASHEDSTATE " +
                                         "from ZASSET zAsset " +
-                                        "left join Z_27ASSETS z27Assets on zAsset.Z_PK = z27Assets.Z_3ASSETS " +
-                                        "left join ZGENERICALBUM zGenAlbum on z27Assets.Z_27ALBUMS = zGenAlbum.Z_PK " +
+                                        "left join Z_28ASSETS zAssets on zAsset.Z_PK = zAssets.Z_3ASSETS " +
+                                        "left join ZGENERICALBUM zGenAlbum on zAssets.Z_28ALBUMS = zGenAlbum.Z_PK " +
                                         "order by 2";
 
                 var assets = new List<Tuple<string, string, double, string, bool>>();
