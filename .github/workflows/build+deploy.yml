@@ -1,0 +1,141 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      do-deploy:
+        type: boolean
+        description: create release?
+      version:
+        required: true
+        description: Version number (e.g. 1.5)
+
+env:
+  AppName: iPhoneMediaTransfer
+  # prefix version number with e.g. "v" or nothing
+  VersionNumberPrefix: v
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    env:
+      ScriptsPath: .\.github\workflows
+      SolutionPath: src\iPhoneMediaTransfer.sln
+      OutputPath: src/iPhoneMediaTransfer/bin/x86/Release
+      VersionNumber: ${{ github.event.inputs.version }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Setup Python
+      if: github.event.inputs.do-deploy == 'true'
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9.13'
+      
+    - name: Install Python module
+      if: github.event.inputs.do-deploy == 'true'
+      run: |
+        python -m pip install --upgrade pip
+        #linux: pip3 install gh-md-to-html
+        python3 -m pip install gh-md-to-html
+      
+    - name: Convert md file
+      if: github.event.inputs.do-deploy == 'true'
+      run: |
+        mkdir temp
+        copy .\README.md temp
+        cd temp
+        #linux: gh-md-to-html README.md -c "" -w . --math false --box-width 24.25cm
+        python3 -m gh_md_to_html README.md -c `"`" -w . --math false --box-width 24.25cm
+        move .\README.html ..
+        move .\images\ ..
+        cd ..
+        Remove-Item -LiteralPath "temp" -Force -Recurse
+        
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.5
+
+    - name: Restore NuGet Packages
+      run: nuget restore ${{ env.SolutionPath }}
+
+    - name: Build
+      run: |
+        msbuild ${{ env.SolutionPath }} /p:Configuration="Release" /p:Platform="x86"
+
+    #- name: list
+    #  run: |
+    #    Get-ChildItem -Path $env:GITHUB_WORKSPACE -Recurse
+
+    - name: Clean
+      run: |
+        Remove-Item -Recurse -Force ".github"
+        Remove-Item -Recurse -Force ".git"
+        Remove-Item -Force ".gitignore"
+        #Remove-Item -Recurse -Force "src\iPhoneMediaTransfer\x64"
+        Get-Childitem -Include obj -Recurse -Force | Remove-Item -Force -Recurse
+        Get-Childitem * -Include ('*.pdb', '*.xml')  -Recurse | Remove-Item
+
+    #- name: Upload Artifact
+    #  uses: actions/upload-artifact@v2
+    #  with:
+    #    name: ${{ env.AppName }}-${{ env.VersionNumberPrefix }}${{ env.VersionNumber }}
+    #    path: ${{ github.workspace }}
+
+# include deploy job as conditional steps
+  #deploy:
+  #  needs: [build]
+  #  if: github.event.inputs.do-deploy == 'true'
+  #  strategy:
+  #    matrix:
+  #      configuration: [Release]
+#
+  #  runs-on: windows-latest
+#
+  #  env:
+  #    VersionNumber: ${{ github.event.inputs.version }}
+  #  
+  #  steps:
+    - name: Create Draft Release
+      id: create_release
+      if: github.event.inputs.do-deploy == 'true'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.VersionNumberPrefix }}${{ env.VersionNumber }}
+        release_name: ${{ env.AppName }}-${{ env.VersionNumberPrefix }}${{ env.VersionNumber }}
+        draft: true
+        prerelease: false
+
+    #- name: Download artifacts
+    #  uses: actions/download-artifact@v2
+    #  with:
+    #    name: ${{ env.AppName }}-${{ env.VersionNumberPrefix }}${{ env.VersionNumber }}
+    #    path: ${{ env.AppName }}
+        
+    - name: Zip files
+      if: github.event.inputs.do-deploy == 'true'
+      uses: thedoctor0/zip-release@master
+      with:
+        type: 'zip'
+        filename: '${{ env.AppName }}-${{ env.VersionNumberPrefix }}${{ env.VersionNumber }}.zip'
+        #path: ${{ env.AppName }}
+        path: ${{ github.workspace }}
+
+    - name: Upload release assets
+      if: github.event.inputs.do-deploy == 'true'
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: .\${{ env.AppName }}-${{ env.VersionNumberPrefix }}${{ env.VersionNumber }}.zip
+        asset_name: ${{ env.AppName }}-${{ env.VersionNumberPrefix }}${{ env.VersionNumber }}.zip
+        asset_content_type: application/zip

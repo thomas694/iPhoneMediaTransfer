@@ -52,6 +52,8 @@ Options:
  <folder>     Path to your target folder.
 ```
 
+For convenience, you can download the source code with prebuilt binaries under [Releases](../../releases). The above mentioned DLLs still need to be provided as described.
+
 ## License <a rel="license" href="https://www.gnu.org/licenses/gpl-3.0"><img alt="GNU GPLv3 license" style="border-width:0" src="https://img.shields.io/badge/License-GPLv3-blue.svg" /></a>
 
 <span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">iPhoneMediaTransfer</span> by thomas694 
