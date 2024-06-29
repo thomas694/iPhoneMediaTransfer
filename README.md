@@ -2,7 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-A command-line tool for transferring photos and videos from an iPhone to a folder on the local computer.
+A Windows command-line tool for transferring photos and videos from an iPhone to a folder on the local computer.
 
 ## Overview
 
