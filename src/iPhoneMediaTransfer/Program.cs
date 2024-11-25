@@ -8,6 +8,11 @@
 // Version 1.0
 // Copyright (c) Feb 2023  thomas694 (@GH 0CFD61744DA1A21C)
 //     initial version
+// Version 1.0  (c) Jun 2023  thomas694
+//     updated select statement due to a recent update
+// Version 1.1  (c) Nov 2024  thomas694
+//     fixed possible wrong order if more than one source folder on the device
+//     changed to try again in case of a failed file transfer
 //
 // iPhoneMediaTransfer is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -207,11 +212,12 @@ namespace iPhoneMediaTransfer
                 connection.Open();
 
                 var command = connection.CreateCommand();
+                // the old DB version had table Z_27ASSETS and column Z_27ALBUMS
                 command.CommandText = @"select zAsset.ZDIRECTORY, zAsset.ZFILENAME, zAsset.ZDATECREATED, zGenAlbum.ZTITLE, zAsset.ZTRASHEDSTATE " +
                                         "from ZASSET zAsset " +
                                         "left join Z_28ASSETS zAssets on zAsset.Z_PK = zAssets.Z_3ASSETS " +
                                         "left join ZGENERICALBUM zGenAlbum on zAssets.Z_28ALBUMS = zGenAlbum.Z_PK " +
-                                        "order by 2";
+                                        "order by 1, 2";
 
                 var assets = new List<Tuple<string, string, double, string, bool>>();
                 using (var reader = command.ExecuteReader())
@@ -228,7 +234,7 @@ namespace iPhoneMediaTransfer
                 }
 
                 var i = 0;
-                while (i <= assets.Count-1)
+                while (i <= assets.Count - 1)
                 {
                     var (folder, filename, timestamp, albumTitle, isDeleted) = assets[i];
 
@@ -237,7 +243,7 @@ namespace iPhoneMediaTransfer
                     var albumNames = new List<string>();
                     if (!string.IsNullOrEmpty(albumTitle)) albumNames.Add(albumTitle);
 
-                    while (i + 1 <= assets.Count - 1 && assets[i + 1].Item2 == filename)
+                    while (i + 1 <= assets.Count - 1 && assets[i + 1].Item1 == folder && assets[i + 1].Item2 == filename)
                     {
                         i++;
                         if (!string.IsNullOrEmpty(assets[i].Item4)) albumNames.Add(assets[i].Item4);
@@ -280,6 +286,7 @@ namespace iPhoneMediaTransfer
             }
             else if (isDeleted)
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePathDeleted));
                 File.Move(filePath, filePathDeleted);
                 action = "moved to deleted";
             }
@@ -297,6 +304,7 @@ namespace iPhoneMediaTransfer
                 var newPath = Path.Combine(_mediaLibraryPath, "Albums", name, filename);
                 if (!File.Exists(newPath))
                 {
+                    Directory.CreateDirectory(Path.GetDirectoryName(newPath));
                     if (_createAlbumHardLinks)
                     {
                         NativeMethods.CreateHardLink(newPath, filePath, IntPtr.Zero);
@@ -317,8 +325,25 @@ namespace iPhoneMediaTransfer
 
         private static void CopyFileFromDevice(string folder, string filename, string localFilePath)
         {
+            iPhoneFile file = null;
+            int retries = 1;
+            do
+            {
+                try
+                {
+                    file = iPhoneFile.OpenRead(_device, $"{folder}/{filename}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error (retrying): {ex}");
+                    System.Threading.Thread.Sleep(1000);
+                }
+            } while (file is null && retries-- > 0);
+
+            if (file is null) return;
+
             byte[] bytes;
-            using (var file = iPhoneFile.OpenRead(_device, $"{folder}/{filename}"))
+            using (file)
             {
                 bytes = file.ReadAll();
             }
