@@ -54,7 +54,7 @@ Options:
 
 For convenience, you can download the source code with prebuilt binaries under [Releases](../../releases). The above mentioned DLLs still need to be provided as described.
 
-## License <a rel="license" href="https://www.gnu.org/licenses/gpl-3.0"><img alt="GNU GPLv3 license" style="border-width:0" src="https://img.shields.io/badge/License-GPLv3-blue.svg" /></a>
+## License <a id="a1" rel="license" href="https://www.gnu.org/licenses/gpl-3.0"><img id="i1" alt="GNU GPLv3 license" style="border-width:0" src="https://img.shields.io/badge/License-GPLv3-blue.svg" /></a>
 
 <span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">iPhoneMediaTransfer</span> by thomas694 
-is licensed under <a rel="license" href="https://www.gnu.org/licenses/gpl-3.0">GNU GPLv3</a>.
+is licensed under <a id="a2" rel="license" href="https://www.gnu.org/licenses/gpl-3.0">GNU GPLv3</a>.

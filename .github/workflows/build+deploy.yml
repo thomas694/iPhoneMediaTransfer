@@ -50,7 +50,7 @@ jobs:
         copy .\README.md temp
         cd temp
         #linux: gh-md-to-html README.md -c "" -w . --math false --box-width 24.25cm
-        python3 -m gh_md_to_html README.md -c `"`" -w . --math false --box-width 24.25cm
+        python3 -m gh_md_to_html README.md -c "" -w . --math false --box-width 24.25cm
         move .\README.html ..
         move .\images\ ..
         cd ..
