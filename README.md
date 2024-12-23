@@ -27,7 +27,7 @@ and extract it with e.g. 7zip to get the MSI packages.
 The referenced library project used the iTunesMobileDevice.dll 757.3.2.1 which belongs to iTunes 12.1.1 from Jan 2015.
 So you can either use the "Application Support" (3.1.2) and "Mobile Device Support" (8.1.1.3) installers from this iTunes version and 
 use the DLLs in their respective folders.
-Or you can use a newer version of the driver (Mobile Device Support, tested 14.1.0.35), but then you have to use the project's old iTunesMobileDevice.dll as newer 
+Or you can use a newer version of the driver (Mobile Device Support, tested 14.1.0.35), but then you have to use the [library project](https://github.com/mkindustries/MK.MobileDevice.Lite)'s old [iTunesMobileDevice.dll](https://github.com/mkindustries/MK.MobileDevice.Lite/releases/download/mobiledevicelite_v5.0.6_bin/iTunesMobileDevice.dll) as newer 
 versions of the driver don't contain that one any more.
 
 Old iTunes versions can be found here:
